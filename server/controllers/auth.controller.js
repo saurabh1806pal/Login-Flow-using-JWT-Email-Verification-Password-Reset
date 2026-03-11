@@ -42,14 +42,24 @@ exports.register = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    
 
     // Sending Welcome Email can be added here
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: newUser.email,
-      subject: "Welcome to Our Service",
-      text: `Hello ${newUser.firstname},\n\nWelcome to our service! We're glad to have you on board.\n\nBest regards,\nTeam`,
-    };
+    // const mailOptions = {
+    //   from: process.env.SENDER_EMAIL,
+    //   to: newUser.email,
+    //   subject: "Welcome to Our Service",
+    //   text: `Hello ${newUser.firstname},\n\nWelcome to our service! We're glad to have you on board.\n\nBest regards,\nTeam`,
+    // };
+
+    res.cookie("token", token, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  domain: "localhost",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
     await transporter.sendMail(mailOptions);
     return res
@@ -92,12 +102,21 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" },
     );
 
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  domain: "localhost",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+    
 
     return res.status(200).json({ message: "Login successful", success: true });
   } catch (error) {
@@ -107,11 +126,18 @@ exports.login = async (req, res) => {
 
 exports.logout = (req, res) => {
   try {
+    // res.clearCookie("token", {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    // });
     res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    });
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  domain: "localhost",
+  path: "/"
+});
     return res
       .status(200)
       .json({ message: "Logout successful", success: true });
