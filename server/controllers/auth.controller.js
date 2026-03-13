@@ -36,37 +36,44 @@ exports.register = async (req, res) => {
       { expiresIn: "7d" },
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
     
 
     // Sending Welcome Email can be added here
-    // const mailOptions = {
-    //   from: process.env.SENDER_EMAIL,
-    //   to: newUser.email,
-    //   subject: "Welcome to Our Service",
-    //   text: `Hello ${newUser.firstname},\n\nWelcome to our service! We're glad to have you on board.\n\nBest regards,\nTeam`,
-    // };
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: newUser.email,
+      subject: "Welcome to Our Service",
+      text: `Hello ${newUser.firstname},\n\nWelcome to our service! We're glad to have you on board.\n\nBest regards,\nTeam`,
+    };
 
     res.cookie("token", token, {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  domain: "localhost",
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    domain: "localhost",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
 });
+
+  console.log("Sending email to:", newUser.email);
+  console.log("Mail options:", mailOptions);
 
     await transporter.sendMail(mailOptions);
     return res
       .status(201)
       .json({ message: "User registered successfully", success: true });
   } catch (error) {
-    return res.status(400).json({ message: error.message, success: false });
+    console.log("REGISTER ERROR:", error);
+  return res.status(400).json({
+    message: error.message,
+    success: false
+  });
   }
 };
 
@@ -109,12 +116,12 @@ exports.login = async (req, res) => {
     //   maxAge: 7 * 24 * 60 * 60 * 1000,
     // });
     res.cookie("token", token, {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  domain: "localhost",
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    domain: "localhost",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
 });
     
 
@@ -132,11 +139,11 @@ exports.logout = (req, res) => {
     //   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     // });
     res.clearCookie("token", {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  domain: "localhost",
-  path: "/"
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    domain: "localhost",
+    path: "/"
 });
     return res
       .status(200)
@@ -316,7 +323,7 @@ exports.resetPassword = async (req, res) => {
     // console.log("Current time:", Date.now());
     // console.log("==== OTP DEBUG END ====");
 
-    if (String(user.resetOtp) !== otp || user.resetOtpExpires < Date.now()) {
+    if (String(user.resetOtp) !== String(otp) || user.resetOtpExpires < Date.now()) {
       return res
         .status(400)
         .json({ message: "Invalid or expired OTP", success: false });

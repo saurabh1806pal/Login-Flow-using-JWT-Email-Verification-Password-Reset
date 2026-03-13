@@ -20,7 +20,7 @@ export const AppContextProvider = ({ children }) => {
                 await getUserData();
             }
         } catch (error) {
-            console.error("Auth check failed:", error);
+            console.log("Auth check failed:", error);
         }finally {
             setAuthLoading(false);
         }
